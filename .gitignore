@@ -1,0 +1,21 @@
+# virtual environment
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# local database
+users.db
+
+# generated files
+outputs/
+mcqs.pdf
+
+# test / old files
+test_llama.py
+main.py
+
+# mac files
+.DS_Store
+

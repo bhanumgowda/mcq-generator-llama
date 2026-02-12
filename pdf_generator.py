@@ -1,21 +1,160 @@
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.colors import Color, black, white
+from reportlab.lib import colors
 import os
+from datetime import datetime
 
-def save_pdf(content, filename="mcqs.pdf"):
+def save_pdf(content, filename="mcqs.pdf", topic="Generated MCQs", user_email=""):
     output_dir = "outputs"
     os.makedirs(output_dir, exist_ok=True)
+    
+    # Generate timestamp-based filename if default
+    if filename == "mcqs.pdf":
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"mcqs_{timestamp}.pdf"
 
     file_path = os.path.join(output_dir, filename)
 
-    doc = SimpleDocTemplate(file_path, pagesize=A4)
+    # Create document with margins
+    doc = SimpleDocTemplate(
+        file_path, 
+        pagesize=A4,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=72
+    )
+    
+    # Get and customize styles
     styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#2E86AB'),
+        spaceAfter=30,
+        alignment=1,  # Center alignment
+        fontName='Helvetica-Bold'
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#666666'),
+        spaceAfter=20,
+        alignment=1,
+        fontName='Helvetica'
+    )
+    
+    question_style = ParagraphStyle(
+        'QuestionStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        spaceAfter=12,
+        fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#333333')
+    )
+    
+    option_style = ParagraphStyle(
+        'OptionStyle',
+        parent=styles['Normal'],
+        fontSize=11,
+        spaceAfter=6,
+        leftIndent=20,
+        fontName='Helvetica'
+    )
+    
+    answer_style = ParagraphStyle(
+        'AnswerStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=15,
+        leftIndent=20,
+        fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#2E86AB')
+    )
+    
     story = []
+    
+    # Header
+    story.append(Paragraph("🎓 EduQuiz Pro", title_style))
+    story.append(Paragraph(f"Multiple Choice Questions - {topic}", subtitle_style))
+    
+    # Info table
+    current_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+    info_data = [
+        ['Generated on:', current_time],
+        ['Generated for:', user_email.split('@')[0].title() if user_email else 'User'],
+        ['Topic:', topic]
+    ]
+    
+    info_table = Table(info_data, colWidths=[2*inch, 4*inch])
+    info_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#666666')),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8F9FA'))
+    ]))
+    
+    story.append(info_table)
+    story.append(Spacer(1, 30))
+    
+    # Process content
+    lines = content.split('\n')
+    current_question = ""
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+            
+        # Clean up line for PDF
+        line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        
+        # Detect question (usually starts with number or "Question")
+        if (line.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '10.')) or 
+            line.lower().startswith('question') or
+            any(line.startswith(f'{i}.') for i in range(11, 21))):
+            if current_question:  # Add space before new question
+                story.append(Spacer(1, 20))
+            story.append(Paragraph(line, question_style))
+            current_question = line
+            
+        # Detect options (A, B, C, D or a), b), c), d))
+        elif (line.startswith(('A)', 'B)', 'C)', 'D)', 'a)', 'b)', 'c)', 'd)')) or
+              line.startswith(('A.', 'B.', 'C.', 'D.', 'a.', 'b.', 'c.', 'd.'))):
+            story.append(Paragraph(line, option_style))
+            
+        # Detect answers (usually contains "Answer:" or "Correct:")
+        elif any(keyword in line.lower() for keyword in ['answer:', 'correct:', 'solution:']):
+            story.append(Paragraph(line, answer_style))
+            
+        # Regular content
+        else:
+            story.append(Paragraph(line, styles['Normal']))
 
-    for line in content.split("\n"):
-        story.append(Paragraph(line.replace("&", "&amp;"), styles["Normal"]))
+    # Footer
+    story.append(Spacer(1, 50))
+    story.append(Paragraph(
+        "Generated by EduQuiz Pro - AI-Powered MCQ Generator", 
+        ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.HexColor('#999999'),
+            alignment=1
+        )
+    ))
 
+    # Build PDF
     doc.build(story)
-
     return file_path

@@ -1,6 +1,7 @@
 streamlit
 langchain-ollama
 reportlab
+Pillow
 
 
 
