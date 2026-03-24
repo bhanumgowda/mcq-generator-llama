@@ -1,7 +1,8 @@
 streamlit
-langchain-ollama
+langchain-groq
 reportlab
 Pillow
+python-dotenv
 
 
 

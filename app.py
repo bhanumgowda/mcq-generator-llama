@@ -1,6 +1,7 @@
 import streamlit as st
-from langchain_ollama import OllamaLLM
+from langchain_groq import ChatGroq
 import time
+import os
 
 from config import Config
 from prompt import build_prompt
@@ -228,44 +229,57 @@ with st.form("mcq_form"):
         else:
             with st.spinner("🤖 AI is crafting your questions... This may take a moment"):
                 try:
-                    llm = OllamaLLM(model=Config.AI_CONFIG["model_name"])
-                    prompt = build_prompt(topic, num_questions, level)
+                    # Get API key from environment
+                    groq_api_key = os.getenv("GROQ_API_KEY")
                     
-                    # Professional progress indication
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
+                    if not groq_api_key:
+                        st.error("❌ GROQ_API_KEY not found. Please set your Groq API key as an environment variable.")
+                        st.info("📌 Add GROQ_API_KEY to your .env file or environment variables.")
+                    else:
+                        llm = ChatGroq(
+                            model=Config.AI_CONFIG["model_name"],
+                            api_key=groq_api_key,
+                            temperature=0.7,
+                            max_tokens=2000
+                        )
+                        prompt = build_prompt(topic, num_questions, level)
+                        
+                        # Professional progress indication
+                        progress_bar = st.progress(0)
+                        status_text = st.empty()
+                        
+                        for i in range(100):
+                            time.sleep(0.02)
+                            progress_bar.progress(i + 1)
+                            if i < 30:
+                                status_text.text("🧠 AI analyzing your topic...")
+                            elif i < 60:
+                                status_text.text("📝 Generating questions...")
+                            elif i < 90:
+                                status_text.text("🎯 Crafting answer options...")
+                            else:
+                                status_text.text("✨ Finalizing your MCQ set...")
+                        
+                        response = llm.invoke(prompt)
+                        response_text = response.content if hasattr(response, 'content') else str(response)
                     
-                    for i in range(100):
-                        time.sleep(0.02)
-                        progress_bar.progress(i + 1)
-                        if i < 30:
-                            status_text.text("🧠 AI analyzing your topic...")
-                        elif i < 60:
-                            status_text.text("📝 Generating questions...")
-                        elif i < 90:
-                            status_text.text("🎯 Crafting answer options...")
-                        else:
-                            status_text.text("✨ Finalizing your MCQ set...")
-                    
-                    response = llm.invoke(prompt)
-                    
-                    # Clear progress indicators
-                    progress_bar.empty()
-                    status_text.empty()
-                    
-                    st.session_state.mcqs = response
-                    st.session_state.current_topic = topic
-                    st.session_state.current_level = level
-                    st.session_state.current_num = num_questions
-                    
-                    st.success(Config.MESSAGES["mcq_success"])
-                    st.balloons()
+                        # Clear progress indicators
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        st.session_state.mcqs = response_text
+                        st.session_state.current_topic = topic
+                        st.session_state.current_level = level
+                        st.session_state.current_num = num_questions
+                        
+                        st.success(Config.MESSAGES["mcq_success"])
+                        st.balloons()
                     
                 except Exception as e:
                     st.error(f"❌ Error generating MCQs: {str(e)}")
-                    st.info("💡 Make sure Ollama is running and the llama3 model is installed")
-                    if "Connection" in str(e):
-                        st.warning("🔗 Check if Ollama service is running: `ollama serve`")
+                    st.info("💡 Make sure your GROQ_API_KEY is set correctly")
+                    if "API" in str(e).upper():
+                        st.warning("🔑 Check your Groq API key in the .env file")
 
 # ----------------------------
 # DISPLAY & MANAGE MCQs

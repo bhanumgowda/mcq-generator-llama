@@ -42,7 +42,7 @@ A professional, AI-powered Multiple Choice Question (MCQ) generator built with S
 
 ### Prerequisites
 - Python 3.9 or higher
-- Ollama installed with Llama3 model
+- Groq API Key (free tier available)
 - Virtual environment (recommended)
 
 ### Installation
@@ -64,19 +64,28 @@ A professional, AI-powered Multiple Choice Question (MCQ) generator built with S
    pip install -r requirements.txt
    ```
 
-4. **Install and setup Ollama:**
+4. **Get your Groq API Key:**
+   - Visit https://console.groq.com/keys
+   - Sign up for a free account
+   - Create an API key
+   - Copy the key (you'll use it in the next step)
+
+5. **Setup Environment Variables:**
    ```bash
-   # Install Ollama (visit https://ollama.ai for platform-specific instructions)
-   # Pull the Llama3 model
-   ollama pull llama3
+   # Create a .env file
+   cp .env.example .env
+   
+   # Edit .env and add your Groq API key
+   nano .env
+   # Add your GROQ_API_KEY in the file
    ```
 
-5. **Run the application:**
+6. **Run the application:**
    ```bash
    streamlit run app.py
    ```
 
-6. **Access the application:**
+7. **Access the application:**
    Open your browser and navigate to `http://localhost:8501`
 
 ## 🎯 How to Use
@@ -114,9 +123,10 @@ A professional, AI-powered Multiple Choice Question (MCQ) generator built with S
 - **File Management**: Organized PDF storage in outputs directory
 
 ### AI Integration
-- **Langchain-Ollama**: Integration with Ollama's Llama3 model
-- **Intelligent Prompting**: Sophisticated prompt engineering for quality
-- **Error Handling**: Robust error management for AI operations
+- **Groq API**: Fast, reliable LLM API with free tier
+- **ChatGroq**: LangChain integration for seamless model access
+- **Mixtral 8x7B**: Powerful open-source model for quality generation
+- **Intelligent Prompting**: Sophisticated prompt engineering for quality questions
 
 ### PDF Generation
 - **ReportLab**: Professional PDF creation and styling
