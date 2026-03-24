@@ -1,0 +1,80 @@
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Streamlit
+.streamlit/
+.streamlit_cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+users.db
+
+# Outputs and logs
+outputs/
+logs/
+*.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# AWS
+AWS_DEPLOYMENT.md
+.aws/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+*.md
+LICENSE
+README.md
+
+# OS files
+.DS_Store
+Thumbs.db

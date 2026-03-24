@@ -2,6 +2,10 @@ import streamlit as st
 from langchain_groq import ChatGroq
 import time
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from config import Config
 from prompt import build_prompt

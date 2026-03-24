@@ -48,7 +48,7 @@ class Config:
     
     # AI Model Configuration
     AI_CONFIG = {
-        "model_name": "mixtral-8x7b-32768",
+        "model_name": "llama-3.3-70b-versatile",
         "api_provider": "groq",
         "max_questions": 20,
         "min_questions": 1,

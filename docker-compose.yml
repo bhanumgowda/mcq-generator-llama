@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  eduquiz-pro:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eduquiz-pro
+    ports:
+      - "8501:8501"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+    volumes:
+      - ./outputs:/app/outputs
+      - ./users.db:/app/users.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: PostgreSQL database (uncomment to use)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: eduquiz-db
+  #   environment:
+  #     POSTGRES_USER: eduquiz
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #     POSTGRES_DB: eduquiz_db
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:
